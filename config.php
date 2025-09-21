@@ -1,20 +1,26 @@
 <?php
-// Database credentials
-$host = "sql303.infinityfree.com";
-$user = "if0_39985753";
-$pass = "Ganeshkumari3";
-$db = "if0_39985753_late_comers";
+// Read MySQL credentials from environment variables (set in Railway)
+$host = getenv("MYSQLHOST") ?: "localhost";
+$user = getenv("MYSQLUSER") ?: "root";
+$pass = getenv("MYSQLPASSWORD") ?: "";
+$db   = getenv("MYSQLDATABASE") ?: "late_comers";
+$port = getenv("MYSQLPORT") ?: 3306;
 
 // Attempt to establish a connection with exception handling
 try {
-    $conn = new mysqli($host, $user, $pass, $db);
+    $conn = new mysqli($host, $user, $pass, $db, $port);
 
     if ($conn->connect_error) {
         throw new Exception("Connection failed: " . $conn->connect_error);
     }
 } catch (Exception $e) {
-    // In a production environment, you would log the error instead of displaying it.
-    // For debugging, displaying the error can be helpful.
-    die("Database connection error: " . $e->getMessage());
+    // In production: log error instead of displaying it
+    header("Content-Type: application/json");
+    echo json_encode([
+        "status" => "error",
+        "message" => "Database connection error",
+        "details" => $e->getMessage()
+    ]);
+    exit;
 }
 ?>
